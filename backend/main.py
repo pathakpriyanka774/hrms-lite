@@ -205,13 +205,13 @@ async def get_employee_attendance(employee_id: str, start_date: Optional[date] =
     conn = sqlite3.connect('hrms.db')
     cursor = conn.cursor()
     
-    # Check if employee exists
+    # Here We Check if employee exists
     cursor.execute("SELECT employee_id FROM employees WHERE employee_id = ?", (employee_id,))
     if not cursor.fetchone():
         conn.close()
         raise HTTPException(status_code=404, detail="Employee not found")
     
-    # Build query with optional date filters
+    # Here We Build query with optional date filters
     query = "SELECT id, employee_id, date, status FROM attendance WHERE employee_id = ?"
     params = [employee_id]
     
