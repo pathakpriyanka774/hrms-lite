@@ -59,15 +59,15 @@ npm run dev
 
 ## Submission Links
 
-- **Live Frontend URL**: `<add-your-live-frontend-url>`
-- **Live Backend API URL**: `<add-your-live-backend-url>`
-- **GitHub Repository Link**: `<add-your-github-repo-link>`
+- **Live Frontend URL**: `https://vercel.com/priyanka-pathaks-projects/hrms-lite`
+- **Live Backend API URL**: `https://hrms-lite-backend-423x.onrender.com`
+- **GitHub Repository Link**: `https://github.com/pathakpriyanka774/hrms-lite`
 
 ## Environment Variables
 
 ### Frontend (`frontend/.env`)
 ```bash
-VITE_API_URL=<your-live-backend-api-url>
+VITE_API_URL=https://hrms-lite-backend-423x.onrender.com
 ```
 
 ## API Endpoints
@@ -87,3 +87,4 @@ VITE_API_URL=<your-live-backend-api-url>
 - SQLite database for simplicity (requires persistent disk in production)
 - Basic server-side and client-side validation with meaningful API errors
 - Responsive design for desktop and mobile
+-This is exact implementation according to this assessment description I have done 
