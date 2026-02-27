@@ -16,8 +16,8 @@ const Dashboard = () => {
       const response = await dashboardAPI.getStats()
       setStats(response.data)
       setError('')
-    } catch (err) {
-      setError('Failed to fetch dashboard statistics')
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Failed to fetch dashboard statistics')
     } finally {
       setLoading(false)
     }

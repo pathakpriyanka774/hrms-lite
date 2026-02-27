@@ -5,7 +5,7 @@ A lightweight web-based HRMS application for managing employee records and track
 ## Tech Stack
 
 **Frontend:**
-- React 18 with Vite
+- React 19 with Vite
 - Tailwind CSS for styling
 - Axios for API calls
 
@@ -31,7 +31,7 @@ A lightweight web-based HRMS application for managing employee records and track
 
 ### Prerequisites
 - Node.js 16+ and npm
-- Python 3.8+
+- Python 3.11+
 
 ### Backend Setup
 ```bash
@@ -46,6 +46,8 @@ uvicorn main:app --reload
 ```bash
 cd frontend
 npm install
+# Create .env file and set backend URL
+echo "VITE_API_URL=http://localhost:8000" > .env
 npm run dev
 ```
 
@@ -53,7 +55,20 @@ npm run dev
 
 - **Frontend**: Deployed on Vercel
 - **Backend**: Deployed on Render
-- **Database**: SQLite (persistent storage)
+- **Database**: SQLite (use a persistent disk/volume in hosted environments)
+
+## Submission Links
+
+- **Live Frontend URL**: `<add-your-live-frontend-url>`
+- **Live Backend API URL**: `<add-your-live-backend-url>`
+- **GitHub Repository Link**: `<add-your-github-repo-link>`
+
+## Environment Variables
+
+### Frontend (`frontend/.env`)
+```bash
+VITE_API_URL=<your-live-backend-api-url>
+```
 
 ## API Endpoints
 
@@ -69,6 +84,6 @@ npm run dev
 ## Assumptions & Limitations
 
 - Single admin user (no authentication)
-- SQLite database for simplicity
-- Basic validation and error handling
+- SQLite database for simplicity (requires persistent disk in production)
+- Basic server-side and client-side validation with meaningful API errors
 - Responsive design for desktop and mobile

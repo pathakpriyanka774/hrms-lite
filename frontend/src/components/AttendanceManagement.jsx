@@ -25,8 +25,8 @@ const AttendanceManagement = () => {
     try {
       const response = await employeeAPI.getAll()
       setEmployees(response.data)
-    } catch (err) {
-      setError('Failed to fetch employees')
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Failed to fetch employees')
     }
   }
 
@@ -44,27 +44,31 @@ const AttendanceManagement = () => {
       if (selectedEmployee === formData.employee_id) {
         fetchAttendanceRecords(selectedEmployee)
       }
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to mark attendance')
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Failed to mark attendance')
     } finally {
       setLoading(false)
     }
   }
 
-  const fetchAttendanceRecords = async (employeeId) => {
+  const fetchAttendanceRecords = async (
+    employeeId,
+    startDate = dateFilter.startDate || null,
+    endDate = dateFilter.endDate || null,
+  ) => {
     if (!employeeId) return
     
     setLoading(true)
     try {
       const response = await attendanceAPI.getByEmployee(
-        employeeId, 
-        dateFilter.startDate || null, 
-        dateFilter.endDate || null
+        employeeId,
+        startDate,
+        endDate,
       )
       setAttendanceRecords(response.data)
       setError('')
-    } catch (err) {
-      setError('Failed to fetch attendance records')
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Failed to fetch attendance records')
       setAttendanceRecords([])
     } finally {
       setLoading(false)
@@ -95,14 +99,14 @@ const AttendanceManagement = () => {
 
   const applyDateFilter = () => {
     if (selectedEmployee) {
-      fetchAttendanceRecords(selectedEmployee)
+      fetchAttendanceRecords(selectedEmployee, dateFilter.startDate || null, dateFilter.endDate || null)
     }
   }
 
   const clearDateFilter = () => {
     setDateFilter({ startDate: '', endDate: '' })
     if (selectedEmployee) {
-      fetchAttendanceRecords(selectedEmployee)
+      fetchAttendanceRecords(selectedEmployee, null, null)
     }
   }
 

@@ -1,13 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import List, Optional
 import sqlite3
-import json
-from datetime import date, datetime
+from datetime import date
 import re
 
 app = FastAPI(title="HRMS Lite API")
+EMAIL_PATTERN = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
 
 # CORS middleware
 app.add_middleware(
@@ -58,15 +58,49 @@ class Employee(BaseModel):
     email: str
     department: str
 
+    @field_validator("employee_id", "full_name", "department")
+    @classmethod
+    def validate_required_text_fields(cls, value: str) -> str:
+        trimmed_value = value.strip()
+        if not trimmed_value:
+            raise ValueError("Field cannot be empty")
+        return trimmed_value
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, value: str) -> str:
+        normalized_email = value.strip().lower()
+        if not normalized_email:
+            raise ValueError("Email is required")
+        if not re.match(EMAIL_PATTERN, normalized_email):
+            raise ValueError("Invalid email format")
+        return normalized_email
+
 class AttendanceRecord(BaseModel):
     employee_id: str
-    date: str
+    date: date
     status: str  # "Present" or "Absent"
+
+    @field_validator("employee_id")
+    @classmethod
+    def validate_employee_id(cls, value: str) -> str:
+        trimmed_value = value.strip()
+        if not trimmed_value:
+            raise ValueError("Employee ID is required")
+        return trimmed_value
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, value: str) -> str:
+        normalized_status = value.strip().capitalize()
+        if normalized_status not in ["Present", "Absent"]:
+            raise ValueError("Status must be 'Present' or 'Absent'")
+        return normalized_status
 
 class AttendanceResponse(BaseModel):
     id: int
     employee_id: str
-    date: str
+    date: date
     status: str
 
 # Employee endpoints
@@ -87,11 +121,6 @@ async def get_employees():
 
 @app.post("/employees", response_model=Employee)
 async def create_employee(employee: Employee):
-    # Email validation
-    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    if not re.match(email_pattern, employee.email):
-        raise HTTPException(status_code=400, detail="Invalid email format")
-    
     conn = sqlite3.connect('hrms.db')
     cursor = conn.cursor()
     
@@ -137,9 +166,6 @@ async def delete_employee(employee_id: str):
 # Attendance endpoints
 @app.post("/attendance", response_model=AttendanceResponse)
 async def mark_attendance(attendance: AttendanceRecord):
-    if attendance.status not in ["Present", "Absent"]:
-        raise HTTPException(status_code=400, detail="Status must be 'Present' or 'Absent'")
-    
     conn = sqlite3.connect('hrms.db')
     cursor = conn.cursor()
     
@@ -152,14 +178,14 @@ async def mark_attendance(attendance: AttendanceRecord):
     try:
         cursor.execute(
             "INSERT INTO attendance (employee_id, date, status) VALUES (?, ?, ?)",
-            (attendance.employee_id, attendance.date, attendance.status)
+            (attendance.employee_id, attendance.date.isoformat(), attendance.status)
         )
         conn.commit()
         
         # Get the inserted record
         cursor.execute(
             "SELECT id, employee_id, date, status FROM attendance WHERE employee_id = ? AND date = ?",
-            (attendance.employee_id, attendance.date)
+            (attendance.employee_id, attendance.date.isoformat())
         )
         record = cursor.fetchone()
         conn.close()
@@ -175,7 +201,7 @@ async def mark_attendance(attendance: AttendanceRecord):
         raise HTTPException(status_code=400, detail="Attendance already marked for this date")
 
 @app.get("/attendance/{employee_id}", response_model=List[AttendanceResponse])
-async def get_employee_attendance(employee_id: str, start_date: Optional[str] = None, end_date: Optional[str] = None):
+async def get_employee_attendance(employee_id: str, start_date: Optional[date] = None, end_date: Optional[date] = None):
     conn = sqlite3.connect('hrms.db')
     cursor = conn.cursor()
     
@@ -191,10 +217,10 @@ async def get_employee_attendance(employee_id: str, start_date: Optional[str] = 
     
     if start_date:
         query += " AND date >= ?"
-        params.append(start_date)
+        params.append(start_date.isoformat())
     if end_date:
         query += " AND date <= ?"
-        params.append(end_date)
+        params.append(end_date.isoformat())
     
     query += " ORDER BY date DESC"
     

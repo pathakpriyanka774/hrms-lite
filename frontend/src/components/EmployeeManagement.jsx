@@ -23,8 +23,8 @@ const EmployeeManagement = () => {
       const response = await employeeAPI.getAll()
       setEmployees(response.data)
       setError('')
-    } catch (err) {
-      setError('Failed to fetch employees')
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Failed to fetch employees')
     } finally {
       setLoading(false)
     }
@@ -39,8 +39,8 @@ const EmployeeManagement = () => {
       setShowForm(false)
       fetchEmployees()
       setError('')
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to create employee')
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Failed to create employee')
     } finally {
       setLoading(false)
     }
@@ -54,8 +54,8 @@ const EmployeeManagement = () => {
       await employeeAPI.delete(employeeId)
       fetchEmployees()
       setError('')
-    } catch (err) {
-      setError('Failed to delete employee')
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Failed to delete employee')
     } finally {
       setLoading(false)
     }
